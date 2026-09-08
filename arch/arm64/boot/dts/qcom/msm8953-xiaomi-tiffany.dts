@@ -9,6 +9,8 @@
 #include "pm8953.dtsi"
 #include "pmi8950.dtsi"
 #include <dt-bindings/leds/common.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/clock/qcom,gcc-msm8953.h>
 
 /delete-node/ &adsp_fw_mem;
 /delete-node/ &qseecom_mem;
@@ -323,4 +325,110 @@
 &usb3_dwc3 {
 	/delete-property/ usb-role-switch;
 	dr_mode = "peripheral";
+};
+&pmi8950_wled {
+    status = "okay";
+    qcom,current-limit-microamp = <20000>;
+    qcom,num-strings = <3>;
+//    qcom,ovp-millivolt = <29500>;
+//    qcom,external-pfet;
+//    qcom,cabc;
+};
+/* ----- 面板供电（由 DSI 控制器管理）----- */
+/* 注：vdd/vddio 已在 DSI 控制器的 vdda-supply/vddio-supply 中配置，
+ * lab/ibb 由 qcom,mdss_dsi_ctrl0 的 lab-supply/ibb-supply 管理，
+ * 因此面板节点只需引用背光和复位 GPIO。
+ */
+
+/* ----- 背光（WLED）配置 ----- */
+&pmi8950_wled {
+    status = "okay";
+    qcom,current-limit-microamp = <20000>;
+    qcom,num-strings = <3>;
+};
+
+&mdss {
+    status = "okay";
+};
+
+&mdss_dsi0_phy {
+    status = "okay";
+};
+
+&mdss_dsi0 {
+    status = "okay";
+
+    /* 供电（添加） */
+    vdda-supply = <&pm8953_l3>;
+    vddio-supply = <&pm8953_l5>;
+
+    /* 时钟分配 - 使用与 msm8953.dtsi 相同的写法 */
+    assigned-clocks = <&gcc BYTE0_CLK_SRC>,
+                      <&gcc PCLK0_CLK_SRC>;
+    assigned-clock-parents = <&mdss_dsi0_phy DSI_BYTE_PLL_CLK>,
+                             <&mdss_dsi0_phy DSI_PIXEL_PLL_CLK>;
+
+    panel@0 {
+        compatible = "mdss,otm1911";
+        reg = <0>;
+        status = "okay";
+
+        backlight = <&pmi8950_wled>;
+        reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
+	power-domains = <&rpmpd MSM8953_VDDCX>;
+	power-domain-names = "cx";
+        /* ---- 时序参数（从原厂 DTS 完整复制） ---- */
+        qcom,mdss-dsi-panel-name = "otm1911 fhd video mode dsi panel";
+        qcom,mdss-dsi-panel-type = "dsi_video_mode";
+        qcom,mdss-dsi-panel-framerate = <0x3c>;
+        qcom,mdss-dsi-virtual-channel-id = <0x00>;
+        qcom,mdss-dsi-stream = <0x00>;
+        qcom,mdss-dsi-panel-width = <0x438>;
+        qcom,mdss-dsi-panel-height = <0x780>;
+        qcom,mdss-dsi-h-front-porch = <0x18>;
+        qcom,mdss-dsi-h-back-porch = <0x18>;
+        qcom,mdss-dsi-h-pulse-width = <0x14>;
+        qcom,mdss-dsi-h-sync-skew = <0x00>;
+        qcom,mdss-dsi-v-back-porch = <0x06>;
+        qcom,mdss-dsi-v-front-porch = <0x0e>;
+        qcom,mdss-dsi-v-pulse-width = <0x02>;
+        qcom,mdss-dsi-h-left-border = <0x00>;
+        qcom,mdss-dsi-h-right-border = <0x00>;
+        qcom,mdss-dsi-v-top-border = <0x00>;
+        qcom,mdss-dsi-v-bottom-border = <0x00>;
+        qcom,mdss-dsi-bpp = <0x18>;
+        qcom,mdss-dsi-underflow-color = <0xff>;
+        qcom,mdss-dsi-border-color = <0x00>;
+
+        qcom,mdss-dsi-on-command = [39 01 00 00 00 00 02 51 ff 39 01 00 00 00 00 02 53 2c 39 01 00 00 00 00 02 55 00 39 01 00 00 78 00 02 11 00 39 01 00 00 14 00 02 29 00];
+        qcom,mdss-dsi-off-command = [39 01 00 00 32 00 02 28 00 39 01 00 00 78 00 02 10 00];
+
+	qcom,mdss-dsi-panel-timings-phy-v2 = <0x2320090a 0x60304a0 0x2320090a 0x60304a0 0x2320090a 0x60304a0 0x2320090a 0x60304a0 0x2326090a 0x60304a0>;
+	qcom,mdss-dsi-t-clk-post = <0x0e>;
+	qcom,mdss-dsi-t-clk-pre = <0x36>;
+
+        qcom,mdss-dsi-bl-min-level = <0x01>;
+        qcom,mdss-dsi-bl-max-level = <0xfff>;
+        qcom,mdss-dsi-dma-trigger = "trigger_sw";
+        qcom,mdss-dsi-mdp-trigger = "none";
+        qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
+        qcom,mdss-dsi-reset-sequence = <0x01 0x14 0x00 0x14 0x01 0x14>;
+        port {
+            panel_in: endpoint {
+                remote-endpoint = <&mdss_dsi0_out>;
+            };
+        };
+    };
+};
+
+&mdss_dsi0_out {
+    data-lanes = <0 1 2 3>;
+    remote-endpoint = <&panel_in>;
+};
+&ibb {
+    regulator-always-on;
+};
+
+&lab {
+    regulator-always-on;
 };

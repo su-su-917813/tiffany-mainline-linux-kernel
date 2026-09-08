@@ -8,8 +8,6 @@
 #include <linux/mod_devicetable.h>
 #include <linux/module.h>
 
-#include <video/mipi_display.h>
-
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_modes.h>
 #include <drm/drm_panel.h>
@@ -39,15 +37,19 @@ static void otm1911_reset(struct otm1911 *ctx)
 static int otm1911_on(struct otm1911 *ctx)
 {
 	struct mipi_dsi_multi_context dsi_ctx = { .dsi = ctx->dsi };
-
-	mipi_dsi_dcs_set_display_brightness_multi(&dsi_ctx, 0x00ff);
-	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_WRITE_CONTROL_DISPLAY,
-				     0x2c);
-	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_WRITE_POWER_SAVE, 0x00);
+	struct device *dev = &ctx->dsi->dev; 
+	dev_info(dev, "Sending panel init commands...\n");
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x51, 0xff);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x53, 0x2c);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x55, 0x00);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x11, 0x00);
 	mipi_dsi_msleep(&dsi_ctx, 120);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x29, 0x00);
 	mipi_dsi_msleep(&dsi_ctx, 20);
+	if (dsi_ctx.accum_err)
+        	dev_err(dev, "DSI command failed with error %d\n", dsi_ctx.accum_err);
+    	else
+        	dev_info(dev, "Panel init commands sent successfully\n");
 
 	return dsi_ctx.accum_err;
 }
@@ -87,13 +89,13 @@ static int otm1911_unprepare(struct drm_panel *panel)
 	struct otm1911 *ctx = to_otm1911(panel);
 	struct device *dev = &ctx->dsi->dev;
 	int ret;
-
+	/*
 	ret = otm1911_off(ctx);
 	if (ret < 0)
 		dev_err(dev, "Failed to un-initialize panel: %d\n", ret);
 
 	gpiod_set_value_cansleep(ctx->reset_gpio, 1);
-
+	*/
 	return 0;
 }
 
