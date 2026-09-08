@@ -1,0 +1,27 @@
+[0] welcome to lk
+
+[10] platform_init()
+[10] target_init()
+[30] MMC card: HCG8a4 (10.2, 04 2008), manufacturer: 90, OEM: 14a, capacity: 62537072640 bytes
+[40] SDHC Running in HS400 mode
+[40] Done initialization of the card
+[40] Waiting for the RPM to populate smd channel table
+[50] lk2nd_init()
+[50] Booted @ 0x10008000, r0=0x0, r1=0x0, r2=0x13400000
+[60] Found valid DTB with 1028 bytes total
+[60] Command line from previous bootloader: lk2nd androidboot.emmc=true androidboot.verifiedbootstate=orange androidboot.veritymode=enforcing androidboot.keymaster=1 androidboot.serialno=336019940804 androidboot.boot_reason= androidboot.secureboot=1 gpt androidboot.baseband=msm mdss_mdp.panel=1:dsi:0:qcom,mdss_dsi_otm1911_fhd_video:1:none:cfg:single_dsi
+[90] Detected device: Qualcomm Technologies, Inc. MSM8953 + PMI8950 QRD SKU3 (compatible: qcom,msm8953-qrd-sku3)
+[110] MDP continuous splash detected: pipe RGB_0, base: 0x90001000, stride: 3240, src: 1080x1920 (0,0), img: 1080x1920, out: 1080x1920 (0,0), format: 0x2243f (bpp: 3)
+[120] Display refresh: cmd mode: 0, auto refresh: 0 (sel: 0x1f20)
+[130] fastboot_init()
+[590] fastboot: processing commands
+[600] fastboot: getvar:product
+[1100] fastboot: getvar:version-bootloader
+[1600] fastboot: getvar:serialno
+[2100] fastboot: getvar:secure
+[3320] fastboot: oem ramoops
+[24980] fastboot: oem ramoops console
+[25010] fastboot: upload
+[61250] fastboot: oem ramoops regions
+[61300] fastboot: upload
+[61320] fastboot: oem log
