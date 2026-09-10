@@ -432,3 +432,38 @@
 &lab {
     regulator-always-on;
 };
+/* 确保触摸屏的 VCC 电源始终开启 */
+&pm8953_l10 {
+    regulator-always-on;
+    regulator-boot-on;
+};
+
+/* 确保 I2C 总线启用 */
+&i2c_3 {
+	status = "okay";
+	clock-frequency = <100000>;
+
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
+
+	/delete-node/ touchscreen@38;    /* ← 关键：干掉遗留的 edt 节点 */
+
+	focaltech@38 {
+		compatible = "focaltech,fts";
+		reg = <0x38>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&ts_int_default>;
+
+		focaltech,reset-gpio = <&tlmm 64 GPIO_ACTIVE_LOW>;
+		focaltech,irq-gpio = <&tlmm 65 IRQ_TYPE_EDGE_FALLING>;
+		focaltech,max-touch-number = <5>;
+		focaltech,display-coords = <0 0 1080 1920>;
+
+		vcc-supply = <&pm8953_l10>;
+		iovcc-supply = <&pm8953_l5>;
+	};
+};

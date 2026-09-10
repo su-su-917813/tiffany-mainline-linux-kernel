@@ -1254,9 +1254,8 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client)
 	if (tsdata->reset_gpio) {
 		usleep_range(5000, 6000);
 		gpiod_set_value_cansleep(tsdata->reset_gpio, 0);
-		msleep(300);
 	}
-
+	msleep(300);
 	input = devm_input_allocate_device(&client->dev);
 	if (!input) {
 		dev_err(&client->dev, "failed to allocate input device.\n");
@@ -1268,7 +1267,17 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client)
 	tsdata->input = input;
 	tsdata->factory_mode = false;
 	i2c_set_clientdata(client, tsdata);
-
+	dev_info(&client->dev, "reset_gpio: %p\n", tsdata->reset_gpio);
+	if (tsdata->reset_gpio) {
+    		dev_info(&client->dev, "Performing reset\n");
+    		gpiod_set_value_cansleep(tsdata->reset_gpio, 0);
+    		msleep(20);
+    		gpiod_set_value_cansleep(tsdata->reset_gpio, 1);
+    		msleep(300);
+	}
+	dev_info(&client->dev, "Identifying touchscreen...\n");
+	error = edt_ft5x06_ts_identify(client, tsdata);
+	dev_info(&client->dev, "Identify returned %d\n", error);
 	error = edt_ft5x06_ts_identify(client, tsdata);
 	if (error) {
 		dev_err(&client->dev, "touchscreen probe failed\n");
