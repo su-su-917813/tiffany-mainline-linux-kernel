@@ -140,7 +140,7 @@ static const struct wcnss_data pronto_v2_data = {
 	.num_pd_vregs = 2,
 	.num_vregs = 1,
 };
-
+/*
 static const struct wcnss_data pronto_v3_data = {
 	.pmu_offset = 0x1004,
 	.spare_offset = 0x1088,
@@ -151,7 +151,20 @@ static const struct wcnss_data pronto_v3_data = {
 	},
 	.num_vregs = 1,
 };
+*/
+static const struct wcnss_data pronto_v3_data = {
+	.pmu_offset = 0x1004,
+	.spare_offset = 0x1088,
 
+	.pd_names = { "mx", "cx" },
+	.vregs = (struct wcnss_vreg_info[]) {
+		{ "vddmx", 1050000, 1150000, 0 },   /* 电源域 vreg */
+		{ "vddcx", 1050000, 1150000, 0 },   /* 电源域 vreg */
+		{ "vddpx", 1800000, 1800000, 0 },   /* 普通 vreg */
+	},
+	.num_vregs = 1,        /* 数组里"普通 vreg"数量（vddpx） */
+	.num_pd_vregs = 2,     /* 数组里"电源域 vreg"数量（vddmx + vddcx） */
+};
 static int wcnss_load(struct rproc *rproc, const struct firmware *fw)
 {
 	struct qcom_wcnss *wcnss = rproc->priv;

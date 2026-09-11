@@ -467,3 +467,29 @@
 		iovcc-supply = <&pm8953_l5>;
 	};
 };
+
+/* ==================== WCNSS (Wi-Fi + BT) ==================== */
+
+&wcnss {
+    status = "okay";
+    firmware-name = "qcom/msm8953/tiffany/wcnss.mdt";
+
+    /* ===== 关键 1：电源域 ===== */
+    power-domains = <&rpmpd MSM8953_VDDCX>,
+                    <&rpmpd MSM8953_VDDMX>;
+    power-domain-names = "cx", "mx";
+
+    /* ===== 关键 2：regulator 供电 ===== */
+    vddmx-supply = <&pm8953_s3>;    /* MX 数字电源 1.225V */
+    vddcx-supply = <&pm8953_s4>;    /* CX 数字电源 1.9V */
+    vddpx-supply = <&pm8953_l5>;    /* 1.8V IO 电源 */
+};
+
+&wcnss_iris {
+    compatible = "qcom,wcn3680";
+
+    vddxo-supply  = <&pm8953_l7>;
+    vddrfa-supply = <&pm8953_l19>;
+    vddpa-supply  = <&pm8953_l9>;
+    vdddig-supply = <&pm8953_l5>;
+};
