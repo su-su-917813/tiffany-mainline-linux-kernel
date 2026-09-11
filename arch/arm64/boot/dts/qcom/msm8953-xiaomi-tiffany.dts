@@ -493,3 +493,32 @@
     vddpa-supply  = <&pm8953_l9>;
     vdddig-supply = <&pm8953_l5>;
 };
+
+
+
+/* ==================== Modem (MSS) ==================== */
+
+&mpss {
+    status = "okay";
+    firmware-name = "qcom/msm8953/tiffany/modem.mdt";
+
+    /* 根据最新的补丁，MSM8953 的 MSS 使用 mss-supply 作为 regulator */
+    mss-supply = <&pm8953_s1>;   /* 电压由 pm8953_s1 提供 */
+};
+
+&modem_smsm {
+    status = "okay";
+};
+
+
+/* ==================== Adreno 506 GPU ==================== */
+
+&gpu {
+    status = "okay";
+};
+
+&gpu_zap_shader {
+    status = "okay";
+    firmware-name = "qcom/msm8953/tiffany/a506_zap.mdt";
+};
+

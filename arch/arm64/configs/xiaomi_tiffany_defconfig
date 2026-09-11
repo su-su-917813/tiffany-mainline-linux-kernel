@@ -1760,7 +1760,8 @@ CONFIG_PREVENT_FIRMWARE_BUILD=y
 #
 CONFIG_FW_LOADER=y
 CONFIG_FW_LOADER_DEBUG=y
-CONFIG_EXTRA_FIRMWARE=""
+CONFIG_EXTRA_FIRMWARE="qcom/msm8953/tiffany/a506_zap.mdt qcom/msm8953/tiffany/a506_zap.b00 qcom/msm8953/tiffany/a506_zap.b01 qcom/msm8953/tiffany/a506_zap.b02 qcom/a530_pm4.fw qcom/a530_pfp.fw qcom/a530v3_gpmu.fw2"
+CONFIG_EXTRA_FIRMWARE_DIR="firmware"
 # CONFIG_FW_LOADER_USER_HELPER is not set
 CONFIG_FW_LOADER_COMPRESS=y
 # CONFIG_FW_LOADER_COMPRESS_XZ is not set
