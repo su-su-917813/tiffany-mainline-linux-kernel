@@ -11,7 +11,7 @@
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/clock/qcom,gcc-msm8953.h>
-
+#include <dt-bindings/firmware/qcom,scm.h>
 /delete-node/ &adsp_fw_mem;
 /delete-node/ &qseecom_mem;
 /delete-node/ &wcnss_fw_mem;
@@ -67,6 +67,12 @@
 			ftrace-size = <0x1000>;
 			pmsg-size = <0x8000>;
 		};
+		rmtfs_mem: rmtfs@f2d00000 {
+        		compatible = "qcom,rmtfs-mem";
+        		reg = <0x0 0xf2d00000 0x0 0x180000>;
+        		no-map;
+    			qcom,client-id = <1>;
+    		};
 	};
 
 	vph_pwr: vph-pwr-regulator {
@@ -497,20 +503,43 @@
 
 
 /* ==================== Modem (MSS) ==================== */
+&soc {
+    bam_dmux_dma: dma-controller@7884000 {
+        compatible = "qcom,bam-v1.7.0";
+        reg = <0x7884000 0x1f000>;
+        interrupts = <GIC_SPI 238 IRQ_TYPE_LEVEL_HIGH>;
+        #dma-cells = <1>;
+        qcom,ee = <0>;
+        qcom,controlled-remotely;
+        status = "okay";
+    };
+};
 
 &mpss {
     status = "okay";
-    firmware-name = "qcom/msm8953/tiffany/modem.mdt";
+    firmware-name = "qcom/msm8953/tiffany/mba.mbn",
+                    "qcom/msm8953/tiffany/modem.mdt";
+    
+    /* 移除对 MSM8953_VDDMD 的 power-domain 引用 */
+    power-domains = <&rpmpd MSM8953_VDDCX>,
+                    <&rpmpd MSM8953_VDDMX>;
+    power-domain-names = "cx", "mx";
 
-    /* 根据最新的补丁，MSM8953 的 MSS 使用 mss-supply 作为 regulator */
-    mss-supply = <&pm8953_s1>;   /* 电压由 pm8953_s1 提供 */
+    /* 保留 mss-supply 作为稳压器 */
+    mss-supply = <&pm8953_s1>;
+    pll-supply = <&pm8953_l7>;
+    bam_dmux: bam-dmux {
+        compatible = "qcom,bam-dmux";
+        dmas = <&bam_dmux_dma 4>, <&bam_dmux_dma 5>;
+        dma-names = "tx", "rx";
+        qcom,remote-pid = <1>;
+        interrupts = <1 IRQ_TYPE_EDGE_BOTH>, <11 IRQ_TYPE_EDGE_BOTH>;
+        interrupt-names = "pc", "pc-ack";
+        interrupt-parent = <&modem_smsm>;
+        qcom,smem-states = <&apps_smsm 1>, <&apps_smsm 11>;
+        qcom,smem-state-names = "pc", "pc-ack";
+    };
 };
-
-&modem_smsm {
-    status = "okay";
-};
-
-
 /* ==================== Adreno 506 GPU ==================== */
 
 &gpu {
@@ -521,4 +550,13 @@
     status = "okay";
     firmware-name = "qcom/msm8953/tiffany/a506_zap.mdt";
 };
+&{/smsm} {
+    mboxes = <0 0>, <&apcs 13>, <0 0>, <&apcs 19>;
+};
+&{/soc@0/remoteproc@4080000/smd-edge} {
+    /delete-property/ qcom,smd-channels;
 
+    ipcrtr {
+        qcom,smd-channels = "IPCRTR";
+    };
+};

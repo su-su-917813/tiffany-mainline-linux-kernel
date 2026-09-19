@@ -2220,7 +2220,6 @@ static const struct rproc_hexagon_res sc7180_mss = {
 	.proxy_pd_names = (char*[]){
 		"cx",
 		"mx",
-		"mss",
 		NULL
 	},
 	.need_mem_protection = true,
@@ -2492,6 +2491,14 @@ static const struct rproc_hexagon_res msm8953_mss = {
 		},
 		{}
 	},
+	.active_supply = (struct qcom_mss_reg_res[]) {
+		{
+			.supply = "mss",
+			.uV = 1050000,
+			.uA = 1000000,
+		},
+		{}
+	},
 	.proxy_clk_names = (char*[]){
 		"xo",
 		NULL
@@ -2505,7 +2512,6 @@ static const struct rproc_hexagon_res msm8953_mss = {
 	.proxy_pd_names = (char*[]) {
 		"cx",
 		"mx",
-		"mss",
 		NULL
 	},
 	.need_mem_protection = false,
@@ -2518,7 +2524,6 @@ static const struct rproc_hexagon_res msm8953_mss = {
 	.has_vq6 = false,
 	.version = MSS_MSM8953,
 };
-
 static const struct rproc_hexagon_res msm8974_mss = {
 	.hexagon_mba_image = "mba.b00",
 	.proxy_supply = (struct qcom_mss_reg_res[]) {
