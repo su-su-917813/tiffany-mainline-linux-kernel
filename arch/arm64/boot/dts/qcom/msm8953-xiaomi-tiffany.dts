@@ -560,3 +560,6 @@
         qcom,smd-channels = "IPCRTR";
     };
 };
+&ipa {
+    status = "okay";
+};
